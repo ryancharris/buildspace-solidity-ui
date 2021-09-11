@@ -15,6 +15,7 @@ export default function App() {
   useEffect(() => {
     checkWalletConnection()
     getPreviousWaveCount()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getAllWaves = async () => {
