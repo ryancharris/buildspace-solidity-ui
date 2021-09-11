@@ -20,7 +20,7 @@ export default function App() {
   const getAllWaves = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner();
-    const waveportalContract = new ethers.Contract('0x2ECDF70FB8Ea0dA36d567535f56636faEf9438F4', abiFile.abi, signer)
+    const waveportalContract = new ethers.Contract('0x35DA2edDB11C57c06C2Aabe963cA2E38061F6227', abiFile.abi, signer)
 
     let waves = await waveportalContract.getAllWaves();
     let wavesCleaned = [];
@@ -34,12 +34,21 @@ export default function App() {
     })
 
     setAllWaves(wavesCleaned)
+
+    waveportalContract.on("NewWave", (from, timestamp, message) => {
+      console.log("NewWave", from, timestamp, message)
+      setAllWaves(oldArray => [...oldArray, {
+        address: from,
+        timestamp: new Date(timestamp * 1000),
+        message: message
+      }])
+    })
   }
 
   const getPreviousWaveCount = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner();
-    const waveportalContract = new ethers.Contract('0x2ECDF70FB8Ea0dA36d567535f56636faEf9438F4', abiFile.abi, signer)
+    const waveportalContract = new ethers.Contract('0x35DA2edDB11C57c06C2Aabe963cA2E38061F6227', abiFile.abi, signer)
 
     let count = await waveportalContract.getTotalWaves()
     setNumOfWaves(count.toNumber())
@@ -87,12 +96,14 @@ export default function App() {
   const wave = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner();
-    const waveportalContract = new ethers.Contract('0x2ECDF70FB8Ea0dA36d567535f56636faEf9438F4', abiFile.abi, signer)
+    const waveportalContract = new ethers.Contract('0x35DA2edDB11C57c06C2Aabe963cA2E38061F6227', abiFile.abi, signer)
 
     let count = await waveportalContract.getTotalWaves();
     console.log('Retrieved total wave count...', count.toNumber());
 
-    const waveTxn = await waveportalContract.wave(messageInput);
+    const waveTxn = await waveportalContract.wave(messageInput, {
+      gasLimit: 300000,
+    });
     console.log('Mining...', waveTxn.hash);
     setIsLoading(true);
     setMinedHash(waveTxn.hash)
